@@ -11,9 +11,9 @@ computer through LocalAI; the browser is simply the chat window.
 
 - [What it installs](#what-it-installs)
 - [Quick start](#quick-start)
-- [Build the executable](#build-the-executable)
 - [Use LocalAI](#use-localai)
 - [How setup works](#how-setup-works)
+- [Beginner tips](#beginner-tips)
 - [Requirements and downloads](#requirements-and-downloads)
 - [Privacy and offline use](#privacy-and-offline-use)
 - [Models and attribution](#models-and-attribution)
@@ -35,7 +35,7 @@ Both models are downloaded, so plan for several gigabytes of internet data and f
 
 ## Quick start
 
-Choose **one** way to run the app:
+Choose the option that matches what you downloaded:
 
 ### Recommended: use the `.exe` (Python not required)
 
@@ -43,8 +43,8 @@ Choose **one** way to run the app:
 2. Select **Releases**.
 3. Open the latest release, find **Assets**, and download `LocalAI-Starter.exe`.
    If you do not see a **Releases** section or an `.exe` asset, a release has
-   not been published yet. Use the Python option below, or build the `.exe`
-   yourself.
+   not been published yet. You can use the Python option below if you already
+   have Python installed, or wait until a downloadable app is published.
 4. Run `LocalAI-Starter.exe`. Setup begins automatically; you do not need to
    install Python.
 5. Keep your internet connection on while Podman, the LocalAI image, and both
@@ -84,77 +84,11 @@ The app starts setup automatically on launch. **Set up LocalAI** is available
 if you need to retry or continue after a restart. **Start LocalAI** starts the
 already-installed container without repeating the initial downloads.
 
-If you already have the project files and Python installed, you can start the
-app directly with:
-
-```powershell
-python localai_setup.py
-```
-
-You can also open the project folder in File Explorer, click the address bar,
-type `cmd`, press Enter, and then run the command above in the Command Prompt
-that opens.
-
-## Build the executable
-
-If you have Python and want to make the `.exe` yourself, double-click
-`build_exe.bat` from the project folder. The script installs PyInstaller and
-builds:
-
-```text
-dist\LocalAI-Starter.exe
-```
-
-Alternatively, run these commands from the project folder:
-
-```powershell
-python -m pip install --user pyinstaller
-python -m PyInstaller --onefile --windowed --name LocalAI-Starter localai_setup.py
-```
-
-You need Python to build the executable, but **not** to run the resulting
-`dist\LocalAI-Starter.exe`.
-
-### Source files and generated app
-
-The files have different purposes:
-
-| File or folder | Purpose |
-| --- | --- |
-| `localai_setup.py` | The Python source code for the blue setup window and installer workflow. |
-| `build_exe.bat` | A Windows script that builds a standalone app from the Python source. |
-| `README.md` | This guide. |
-| `dist\LocalAI-Starter.exe` | The app created by the build script. This is the file to run or share with Windows users who do not have Python. |
-
-Building the `.exe` does not install LocalAI. The person who runs the app still
-needs an internet connection for the first setup.
-
-### Publish a downloadable GitHub release
-
-The GitHub **Releases** page only has an executable download after a maintainer
-publishes a release and uploads the file. Building the project locally does not
-automatically publish it.
-
-To publish a release for this project:
-
-1. Build the executable using `build_exe.bat`.
-2. Open the repository on GitHub and select **Releases**.
-3. Choose **Draft a new release**.
-4. Create or choose a version tag, such as `v0.1.0`.
-5. Add a short release title and notes.
-6. Under **Attach binaries**, upload `dist\LocalAI-Starter.exe`.
-7. Publish the release.
-
-After a release is published, users can download the app from:
-
-```text
-https://github.com/<OWNER>/<REPOSITORY>/releases/latest
-```
-
-Replace `<OWNER>` with the GitHub account or organization and `<REPOSITORY>`
-with the repository name. On that page, expand **Assets** and download
-`LocalAI-Starter.exe`. The **Source code (zip)** entry is not the ready-to-run
-Windows app; it contains the source files instead.
+If you are unsure which file to use, choose `LocalAI-Starter.exe` from the
+latest release's **Assets**. Use `localai_setup.py` only if you intentionally
+want to run the Python source and already have Python installed. A GitHub
+**Source code (zip)** download contains the source; it is not the ready-to-run
+`.exe`.
 
 ## Use LocalAI
 
@@ -194,29 +128,6 @@ The two entries are separate models, not a guarantee of different quality for
 every task. Compare their responses and use whichever suits the conversation.
 The "abliterated" model is a community fine-tune and may behave differently
 from the regular instruction model.
-
-### Optional API example
-
-LocalAI also provides a local OpenAI-compatible chat endpoint. In PowerShell,
-you can send a test request after starting LocalAI:
-
-```powershell
-$body = @{
-    model = "qwen25-instruct"
-    messages = @(
-        @{ role = "user"; content = "Explain what a Python function is." }
-    )
-} | ConvertTo-Json -Depth 5
-
-Invoke-RestMethod `
-    -Uri "http://localhost:8080/v1/chat/completions" `
-    -Method Post `
-    -ContentType "application/json" `
-    -Body $body
-```
-
-This example sends the request to your own computer. It does not use an OpenAI
-account or cloud API key.
 
 ## How setup works
 
@@ -270,12 +181,80 @@ podman start localai-beginner
 If Podman reports that the machine is already running, continue with the
 container start command.
 
+## Beginner tips
+
+### Start with a clear request
+
+Local models respond best when you say what you want and include relevant
+context. Instead of asking "fix this", paste the error and nearby code, then
+describe what you expected to happen. For example:
+
+> I am learning Python. Explain this error in simple language, tell me which
+> line causes it, and suggest one small fix. Do not rewrite the whole program.
+
+For code tasks, state the programming language, the goal, and any constraints.
+For writing tasks, tell the model the audience and the tone you want. If an
+answer is too long or unclear, ask a follow-up question or request a shorter
+explanation.
+
+### Give the model only the context it needs
+
+The chat model does not automatically inspect your computer. It cannot see a
+file just because the file exists on your PC. Paste a small relevant excerpt,
+the exact error message, or a short example. Remove passwords, access tokens,
+private keys, personal information, and other secrets before pasting content.
+
+If a document or code file is very large, start with the specific section
+related to your question. You can provide more context in a follow-up if the
+first answer is off target.
+
+### Check answers before relying on them
+
+Local language models generate likely responses; they do not guarantee that an
+answer is correct. Verify facts that matter, run and review code in a safe
+environment, and do not use model output as the only basis for medical, legal,
+financial, safety, or security decisions. When asking for code, request an
+explanation of the proposed change and test it before using it.
+
+### Choose between the two models
+
+Start with `qwen25-instruct` for ordinary questions and coding help. Try
+`qwen25-abliterated` if you specifically want to compare the community
+fine-tune's response style. Each has separate weights and may respond
+differently to the same prompt. Neither model has perfect knowledge, and
+neither automatically knows current events.
+
+### Understand local chat and chat history
+
+The browser is the interface to LocalAI running on your own PC. The setup app
+does not provide an online account, hosted chat service, or synchronization
+between devices. Conversations shown by the LocalAI interface are managed by
+that application; this project does not define a separate account or backup
+service for them.
+
+Avoid putting sensitive information into chats unless you understand how the
+LocalAI interface stores its conversations and how other users of your Windows
+account can access your files.
+
+### Internet and offline behavior
+
+Internet is needed for the initial installers and model downloads. Once setup
+has completed and both models are available, ordinary inference uses the local
+server and downloaded weights. Disconnecting from the internet does not make
+the app download missing files; finish setup first. Some optional LocalAI
+features or websites may require network access, but this starter's text chat
+does not need a remote AI account.
+
+If you restart Windows, the Podman VM or container may need to be started
+again. Open Local AI Starter and choose **Start LocalAI**, then use
+`http://localhost:8080`.
+
 ## Requirements and downloads
 
 - **Operating system:** Windows with WSL2 support. Podman uses a Linux VM on
   Windows. WinGet requires Windows 10 version 1809 (build 17763) or later.
 - **Python:** not required when running the released `.exe`. Python 3.9 or later
-  is needed to run `localai_setup.py` or build the executable.
+  is needed only if you choose to run `localai_setup.py`.
 - **Internet:** required for initial downloads. If WinGet is missing, its
   official release package and dependencies require roughly 300 MB. Podman,
   the LocalAI CPU image, and the two models require additional downloads.
@@ -291,7 +270,9 @@ disk space and does not choose models based on hardware. The CPU image works
 without a supported GPU, but inference speed depends on your computer. A model
 may use several gigabytes of memory while it is running.
 
-Download sizes may vary. CPU inference speed depends on your computer. These compact models can help with everyday questions and coding, but may make mistakes and are not a substitute for checking important information.
+Download sizes vary. CPU speed depends on your computer. These compact models
+can help with everyday questions and coding, but may make mistakes; verify
+important information.
 
 ## Privacy and offline use
 
@@ -310,11 +291,17 @@ authentication is configured by this starter.
 
 Keep internet connected until setup and the first model startup finish. After the model files and runtime are downloaded and prepared, ordinary chat can work offline. Features that require online services are not included in this guarantee.
 
-The current Podman port mapping may make port `8080` reachable from other
-devices on your network, depending on Windows, Podman, and firewall behavior.
-Use it only on a trusted network; this starter does not configure LocalAI
-authentication. Do not forward this port from your router or expose it to the
-public internet.
+Podman publishes the LocalAI port on `127.0.0.1` only, so the chat interface is
+intended to be reachable from this PC, not other devices on your network. This
+starter does not configure LocalAI authentication. Do not change the port
+mapping to listen on all network interfaces or expose it to the public internet
+unless you have separately configured appropriate authentication and network
+protections.
+
+If you are upgrading from a version that created the container with a
+non-loopback port mapping, setup removes and recreates only the
+`localai-beginner` container with the localhost-only mapping. Your downloaded
+model files in `%USERPROFILE%\.localai\models` are kept.
 
 ## Models and attribution
 
